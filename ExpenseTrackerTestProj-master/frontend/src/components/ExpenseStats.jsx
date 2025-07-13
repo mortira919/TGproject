@@ -1,4 +1,10 @@
 import { useEffect, useState } from "react";
+import styles from "./ExpenseStats.module.css";
+import {
+  fetchStatsDays,
+  fetchStatsWeek,
+  fetchStatsMonth
+} from "../api/expensesApi";
 
 export default function ExpenseStats() {
   const [dailyStats, setDailyStats] = useState([]);
@@ -6,28 +12,23 @@ export default function ExpenseStats() {
   const [monthTotal, setMonthTotal] = useState(0);
 
   useEffect(() => {
-    fetch("http://localhost:5001/stats/days")
-      .then((res) => res.json())
-      .then(setDailyStats);
-
-    fetch("http://localhost:5001/stats/week")
-      .then((res) => res.json())
-      .then((data) => setWeekTotal(data.total ?? 0));
-
-    fetch("http://localhost:5001/stats/month")
-      .then((res) => res.json())
-      .then((data) => setMonthTotal(data.total ?? 0));
+    fetchStatsDays().then(setDailyStats);
+    fetchStatsWeek().then((data) => setWeekTotal(data.total ?? 0));
+    fetchStatsMonth().then((data) => setMonthTotal(data.total ?? 0));
   }, []);
 
   return (
-    <div>
-      <h3>Статистика</h3>
-      <p>За 7 дней: {weekTotal} ₽</p>
-      <p>За 30 дней: {monthTotal} ₽</p>
-      <h4>По дням:</h4>
-      <ul>
+    <div className={styles.statsBlock}>
+      <h3>📊 Статистика расходов</h3>
+      <p><strong>За 7 дней:</strong> {weekTotal} ₽</p>
+      <p><strong>За 30 дней:</strong> {monthTotal} ₽</p>
+      <h4>📅 По дням:</h4>
+      <ul className={styles.statList}>
         {dailyStats.map((s, i) => (
-          <li key={i}>{s.day}: {s.total} ₽</li>
+          <li key={i}>
+            <span className={styles.day}>{s.day}</span> —{" "}
+            <span className={styles.amount}>{s.total} ₽</span>
+          </li>
         ))}
       </ul>
     </div>

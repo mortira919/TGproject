@@ -52,3 +52,20 @@ export async function updateExpense(id, expense) {
   return res.json();
 }
 
+
+export async function fetchStatsDays() {
+  const res = await fetch("http://localhost:5001/stats/days");
+  return res.json();
+}
+
+export async function fetchStatsWeek() {
+  const res = await fetch("http://localhost:5001/stats/week");
+  return res.json();
+}
+
+export async function fetchStatsMonth() {
+  const res = await fetch("http://localhost:5001/stats/month");
+  return res.json();
+}
+
+

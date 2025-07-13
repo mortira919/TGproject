@@ -1,0 +1,14 @@
+.statBlock {
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.statList {
+  list-style: disc;
+  margin-left: 20px;
+}
+
+.day {
+  color: #ccc;
+}

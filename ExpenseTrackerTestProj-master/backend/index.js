@@ -20,29 +20,31 @@ app.get("/", (req, res) => {
 
 // Добавить расход
 app.post("/expenses", (req, res) => {
-  const { amount, category, comment } = req.body;
+  const { amount, category, comment, telegram_id } = req.body;
 
   if (!amount || !category) {
-    return res.status(400).json({ error: "Amount и category обязательны" });
+    return res.status(400).json({ error: "Amount и category, telegram_id обязательны" });
   }
 
   const stmt = db.prepare(`
-    INSERT INTO expenses (amount, category, comment, date)
-    VALUES (?, ?, ?, datetime('now'))
+    INSERT INTO expenses (amount, category, comment, date, telegram_id)
+    VALUES (?, ?, ?, datetime('now'), ?)
   `);
-  const info = stmt.run(amount, category, comment);
+  const info = stmt.run(amount, category, comment, telegram_id);
 
   res.json({ id: info.lastInsertRowid });
 });
 
 // Получить все расходы
 app.get("/expenses", (req, res) => {
-  const stmt = db.prepare("SELECT * FROM expenses ORDER BY date DESC");
-  const expenses = stmt.all();
+  const { telegram_id } = req.query;
+  if (!telegram_id) return res.status(400).json({ error: "telegram_id обязателен" });
+
+  const stmt = db.prepare("SELECT * FROM expenses WHERE telegram_id = ? ORDER BY date DESC");
+  const expenses = stmt.all(telegram_id);
   res.json(expenses);
 });
 
-// Обновить расход
 app.put("/expenses/:id", (req, res) => {
   const id = req.params.id;
   const { amount, category, comment } = req.body;
@@ -70,32 +72,37 @@ app.delete("/expenses/:id", (req, res) => {
   res.json({ deleted: info.changes });
 });
 
-// Статистика
+// Статистика по дням
 app.get("/stats/days", (req, res) => {
+  const { telegram_id } = req.query;
   const stmt = db.prepare(`
     SELECT strftime('%Y-%m-%d', date) as day, SUM(amount) as total
     FROM expenses
+    WHERE telegram_id = ?
     GROUP BY day ORDER BY day DESC LIMIT 30
   `);
-  res.json(stmt.all());
+  res.json(stmt.all(telegram_id));
 });
 
+// За 7 дней
 app.get("/stats/week", (req, res) => {
+  const { telegram_id } = req.query;
   const stmt = db.prepare(`
     SELECT SUM(amount) as total
     FROM expenses
-    WHERE date >= datetime('now', '-7 days')
+    WHERE date >= datetime('now', '-7 days') AND telegram_id = ?
   `);
-  res.json(stmt.get());
+  res.json(stmt.get(telegram_id));
 });
-
+// За 30 дней
 app.get("/stats/month", (req, res) => {
+  const { telegram_id } = req.query;
   const stmt = db.prepare(`
     SELECT SUM(amount) as total
     FROM expenses
-    WHERE date >= datetime('now', '-30 days')
+    WHERE date >= datetime('now', '-30 days') AND telegram_id = ?
   `);
-  res.json(stmt.get());
+  res.json(stmt.get(telegram_id));
 });
 
 app.listen(PORT, () => {

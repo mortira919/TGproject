@@ -5,18 +5,24 @@ import {
   deleteExpense,
   updateExpense,
 } from "../api/expensesApi";
-import AddExpenseForm from "../AddExpenseForm";
+import AddExpenseForm from "./AddExpenseForm";
+import ExpenseStats from "./ExpenseStats";
+import { WebApp } from "@twa-dev/sdk";
 
 export default function ExpenseTracker() {
   const [expenses, setExpenses] = useState([]);
   const [editing, setEditing] = useState(null);
+  const [telegramId, setTelegramId] = useState(9999); // ← fallback для браузера
 
   useEffect(() => {
+    if (WebApp?.initDataUnsafe?.user?.id) {
+      setTelegramId(WebApp.initDataUnsafe.user.id);
+    }
     loadExpenses();
   }, []);
 
   async function loadExpenses() {
-    const data = await fetchExpenses();
+    const data = await fetchExpenses(telegramId);
     setExpenses(data);
   }
 
@@ -27,17 +33,14 @@ export default function ExpenseTracker() {
   }
 
   async function handleSave(expense) {
-  if (editing) {
-    console.log("Редактируем ID:", editing.id, typeof editing.id); // 👈 здесь
-
-    await updateExpense(Number(editing.id), expense); // 👈 обязательно Number
-    setEditing(null);
-  } else {
-    await addExpense(expense);
+    if (editing) {
+      await updateExpense(Number(editing.id), expense);
+      setEditing(null);
+    } else {
+      await addExpense({ ...expense, telegram_id: telegramId });
+    }
+    loadExpenses();
   }
-  loadExpenses();
-}
-
 
   return (
     <div>
@@ -54,6 +57,9 @@ export default function ExpenseTracker() {
 
       <h3>{editing ? "Редактировать расход" : "Добавить расход"}</h3>
       <AddExpenseForm onSave={handleSave} initialData={editing} />
+
+      <hr style={{ margin: "20px 0" }} />
+      <ExpenseStats />
     </div>
   );
 }
