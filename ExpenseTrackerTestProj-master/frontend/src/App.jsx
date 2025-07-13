@@ -1,25 +1,32 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { WebApp } from "@twa-dev/sdk";
 import ExpenseTracker from "./components/ExpenseTracker";
 import ExpenseStats from "./components/ExpenseStats";
-import { WebApp } from "@twa-dev/sdk";
 
 function App() {
+  const [telegramId, setTelegramId] = useState(null);
+
   useEffect(() => {
-  if (WebApp?.ready && WebApp?.expand) {
     WebApp.ready();
     WebApp.expand();
-    console.log("User data:", WebApp.initDataUnsafe?.user);
-  } else {
-    console.log("⚠️ WebApp SDK не доступен (не в Telegram)");
-  }
-}, []);
+
+    const user = WebApp.initDataUnsafe?.user;
+    if (user) {
+      console.log("✅ Telegram WebApp user:", user);
+      setTelegramId(user.id.toString());
+    } else {
+      console.warn("⚠️ Не удалось получить Telegram ID");
+    }
+  }, []);
+
+  if (!telegramId) return <div>Загрузка...</div>;
 
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Трекер расходов</h1>
-      <ExpenseTracker />
+      <ExpenseTracker telegramId={telegramId} />
       <hr style={styles.divider} />
-      <ExpenseStats />
+      <ExpenseStats telegramId={telegramId} />
     </div>
   );
 }

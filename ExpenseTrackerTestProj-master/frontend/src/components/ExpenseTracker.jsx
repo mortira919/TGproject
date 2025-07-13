@@ -7,19 +7,14 @@ import {
 } from "../api/expensesApi";
 import AddExpenseForm from "./AddExpenseForm";
 import ExpenseStats from "./ExpenseStats";
-import { WebApp } from "@twa-dev/sdk";
 
-export default function ExpenseTracker() {
+export default function ExpenseTracker({ telegramId }) {
   const [expenses, setExpenses] = useState([]);
   const [editing, setEditing] = useState(null);
-  const [telegramId, setTelegramId] = useState(9999); // ← fallback для браузера
 
   useEffect(() => {
-    if (WebApp?.initDataUnsafe?.user?.id) {
-      setTelegramId(WebApp.initDataUnsafe.user.id);
-    }
     loadExpenses();
-  }, []);
+  }, [telegramId]);
 
   async function loadExpenses() {
     const data = await fetchExpenses(telegramId);
@@ -59,7 +54,7 @@ export default function ExpenseTracker() {
       <AddExpenseForm onSave={handleSave} initialData={editing} />
 
       <hr style={{ margin: "20px 0" }} />
-      <ExpenseStats />
+      <ExpenseStats telegramId={telegramId} />
     </div>
   );
 }

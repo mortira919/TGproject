@@ -6,16 +6,18 @@ import {
   fetchStatsMonth
 } from "../api/expensesApi";
 
-export default function ExpenseStats() {
+export default function ExpenseStats({ telegramId }) {
   const [dailyStats, setDailyStats] = useState([]);
   const [weekTotal, setWeekTotal] = useState(0);
   const [monthTotal, setMonthTotal] = useState(0);
 
   useEffect(() => {
-    fetchStatsDays().then(setDailyStats);
-    fetchStatsWeek().then((data) => setWeekTotal(data.total ?? 0));
-    fetchStatsMonth().then((data) => setMonthTotal(data.total ?? 0));
-  }, []);
+    if (!telegramId) return;
+
+    fetchStatsDays(telegramId).then(setDailyStats);
+    fetchStatsWeek(telegramId).then((data) => setWeekTotal(data.total ?? 0));
+    fetchStatsMonth(telegramId).then((data) => setMonthTotal(data.total ?? 0));
+  }, [telegramId]);
 
   return (
     <div className={styles.statsBlock}>
