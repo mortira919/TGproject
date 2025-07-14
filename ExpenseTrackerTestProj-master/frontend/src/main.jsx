@@ -1,15 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.jsx';
 
-console.log('Telegram WebApp:', window.Telegram.WebApp);
-
-const tg = window.Telegram.WebApp;
-console.log('User data:', tg.initDataUnsafe.user);
+if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+  console.log('✅ Telegram WebApp:', window.Telegram.WebApp);
+  console.log('👤 User data:', window.Telegram.WebApp.initDataUnsafe?.user);
+} else {
+  console.warn('⚠️ Telegram WebApp SDK недоступен. Открой через Telegram!');
+}
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+  <App />
+);

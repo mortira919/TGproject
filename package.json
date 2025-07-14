@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@twa-dev/sdk": "^8.0.2",
+    "telegraf": "^4.16.3"
+  }
+}

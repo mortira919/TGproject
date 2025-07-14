@@ -7,27 +7,32 @@ function App() {
   const [telegramId, setTelegramId] = useState(null);
 
   useEffect(() => {
-    if (typeof WebApp !== "undefined") {
+    console.log("📦 WebApp:", WebApp);
+    console.log("📦 initDataUnsafe:", WebApp.initDataUnsafe);
+
+    if (typeof WebApp !== "undefined" && WebApp.initDataUnsafe?.user) {
       try {
         WebApp.ready();
         WebApp.expand();
 
-        const user = WebApp.initDataUnsafe?.user;
-        if (user) {
-          console.log("✅ Telegram WebApp user:", user);
-          setTelegramId(user.id.toString());
-        } else {
-          console.warn("⚠️ Не удалось получить Telegram ID");
-        }
+        const user = WebApp.initDataUnsafe.user;
+        console.log("✅ Telegram WebApp user:", user);
+        setTelegramId(user.id.toString());
       } catch (error) {
         console.error("❌ Ошибка при инициализации WebApp SDK:", error);
       }
     } else {
-      console.warn("❌ WebApp SDK не доступен. Убедись, что открыл из Telegram");
+      console.warn("⚠️ WebApp SDK недоступен или initData пуст. Проверь, открыт ли через Telegram.");
+      // setTelegramId("123456789"); // <- временный fallback, если хочешь тестировать вне Telegram
     }
   }, []);
 
-  if (!telegramId) return <div>Загрузка... Убедись, что ты открыл мини-приложение через Telegram</div>;
+  if (!telegramId)
+    return (
+      <div>
+        Загрузка... Убедись, что ты открыл мини-приложение через Telegram
+      </div>
+    );
 
   return (
     <div style={styles.container}>
