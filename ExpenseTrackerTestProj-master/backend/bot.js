@@ -2,11 +2,8 @@ import { Telegraf } from 'telegraf';
 
 const bot = new Telegraf('8194849046:AAGE0atgOipBKF-akWVPZ308aoj50X8Ptk4');
 
-// Твой задеплоенный фронт (Vercel)
-const WEB_APP_URL = "tg-project-drab.vercel.app";
-
-
-
+// ✅ Полный URL с https
+const WEB_APP_URL = "https://tg-project-drab.vercel.app";
 
 bot.start((ctx) => {
   console.log("▶️ Получен /start от:", ctx.from?.id);
@@ -25,7 +22,6 @@ bot.start((ctx) => {
   });
 });
 
-// fallback: чтобы можно было вручную открыть с текстовой команды
 bot.hears('Открыть приложение', (ctx) => {
   ctx.reply('Вот кнопка для открытия 👇', {
     reply_markup: {
