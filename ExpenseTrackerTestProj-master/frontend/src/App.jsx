@@ -7,19 +7,27 @@ function App() {
   const [telegramId, setTelegramId] = useState(null);
 
   useEffect(() => {
-    WebApp.ready();
-    WebApp.expand();
+    if (typeof WebApp !== "undefined") {
+      try {
+        WebApp.ready();
+        WebApp.expand();
 
-    const user = WebApp.initDataUnsafe?.user;
-    if (user) {
-      console.log("✅ Telegram WebApp user:", user);
-      setTelegramId(user.id.toString());
+        const user = WebApp.initDataUnsafe?.user;
+        if (user) {
+          console.log("✅ Telegram WebApp user:", user);
+          setTelegramId(user.id.toString());
+        } else {
+          console.warn("⚠️ Не удалось получить Telegram ID");
+        }
+      } catch (error) {
+        console.error("❌ Ошибка при инициализации WebApp SDK:", error);
+      }
     } else {
-      console.warn("⚠️ Не удалось получить Telegram ID");
+      console.warn("❌ WebApp SDK не доступен. Убедись, что открыл из Telegram");
     }
   }, []);
 
-  if (!telegramId) return <div>Загрузка...</div>;
+  if (!telegramId) return <div>Загрузка... Убедись, что ты открыл мини-приложение через Telegram</div>;
 
   return (
     <div style={styles.container}>
