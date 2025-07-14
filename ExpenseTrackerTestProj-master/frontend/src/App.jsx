@@ -1,38 +1,50 @@
 import React, { useEffect, useState } from "react";
-import { WebApp } from "@twa-dev/sdk";
 import ExpenseTracker from "./components/ExpenseTracker";
 import ExpenseStats from "./components/ExpenseStats";
 
 function App() {
   const [telegramId, setTelegramId] = useState(null);
+  const [isTelegram, setIsTelegram] = useState(true);
 
   useEffect(() => {
-    console.log("📦 WebApp:", WebApp);
-    console.log("📦 initDataUnsafe:", WebApp.initDataUnsafe);
+    const tg = window.Telegram?.WebApp;
 
-    if (typeof WebApp !== "undefined" && WebApp.initDataUnsafe?.user) {
+    if (tg?.initDataUnsafe?.user?.id) {
       try {
-        WebApp.ready();
-        WebApp.expand();
+        tg.ready();
+        tg.expand();
 
-        const user = WebApp.initDataUnsafe.user;
-        console.log("✅ Telegram WebApp user:", user);
-        setTelegramId(user.id.toString());
-      } catch (error) {
-        console.error("❌ Ошибка при инициализации WebApp SDK:", error);
+        const userId = tg.initDataUnsafe.user.id.toString();
+        console.log("✅ Telegram user ID:", userId);
+        setTelegramId(userId);
+      } catch (e) {
+        console.error("❌ Ошибка инициализации Telegram SDK:", e);
+        setIsTelegram(false);
       }
     } else {
-      console.warn("⚠️ WebApp SDK недоступен или initData пуст. Проверь, открыт ли через Telegram.");
-      // setTelegramId("123456789"); // <- временный fallback, если хочешь тестировать вне Telegram
+      console.warn("❌ Не внутри Telegram WebApp или нет initDataUnsafe");
+      setIsTelegram(false);
     }
   }, []);
 
-  if (!telegramId)
+  if (!isTelegram) {
     return (
-      <div>
-        Загрузка... Убедись, что ты открыл мини-приложение через Telegram
+      <div style={styles.container}>
+        <h2>⚠️ Открыто вне Telegram</h2>
+        <p>
+          Пожалуйста, открой мини-приложение через Telegram-бота.
+        </p>
       </div>
     );
+  }
+
+  if (!telegramId) {
+    return (
+      <div style={styles.container}>
+        <p>⏳ Загрузка Telegram данных...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -50,6 +62,10 @@ const styles = {
     margin: "0 auto",
     padding: "20px",
     fontFamily: "sans-serif",
+    color: "#fff",
+    backgroundColor: "#121212",
+    minHeight: "100vh",
+    textAlign: "center"
   },
   title: {
     textAlign: "center",
