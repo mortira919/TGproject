@@ -6,9 +6,8 @@ import {
   updateExpense,
 } from "../api/expensesApi";
 import AddExpenseForm from "./AddExpenseForm";
-import ExpenseStats from "./ExpenseStats";
 
-export default function ExpenseTracker({ telegramId }) {
+export default function ExpenseTracker({ telegramId, children }) {
   const [expenses, setExpenses] = useState([]);
   const [editing, setEditing] = useState(null);
 
@@ -53,12 +52,8 @@ export default function ExpenseTracker({ telegramId }) {
         {expenses.map((exp) => (
           <li key={exp.id}>
             {exp.amount} ₽ — {exp.category} ({exp.comment})
-            <button onClick={() => setEditing(exp)} style={styles.editBtn}>
-              ✏️
-            </button>
-            <button onClick={() => handleDelete(exp.id)} style={styles.delBtn}>
-              🗑
-            </button>
+            <button onClick={() => setEditing(exp)} style={styles.editBtn}>✏️</button>
+            <button onClick={() => handleDelete(exp.id)} style={styles.delBtn}>🗑</button>
           </li>
         ))}
       </ul>
@@ -70,9 +65,7 @@ export default function ExpenseTracker({ telegramId }) {
         telegramId={telegramId}
       />
 
-      <hr style={{ margin: "20px 0" }} />
-
-      <ExpenseStats telegramId={telegramId} />
+      {children?.(expenses)}
     </div>
   );
 }

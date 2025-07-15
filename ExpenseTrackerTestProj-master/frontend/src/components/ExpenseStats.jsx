@@ -6,7 +6,7 @@ import {
   fetchStatsMonth
 } from "../api/expensesApi";
 
-export default function ExpenseStats({ telegramId }) {
+export default function ExpenseStats({ telegramId, expenses }) {
   const [dailyStats, setDailyStats] = useState([]);
   const [weekTotal, setWeekTotal] = useState(0);
   const [monthTotal, setMonthTotal] = useState(0);
@@ -14,10 +14,42 @@ export default function ExpenseStats({ telegramId }) {
   useEffect(() => {
     if (!telegramId) return;
 
-    fetchStatsDays(telegramId).then(setDailyStats);
-    fetchStatsWeek(telegramId).then((data) => setWeekTotal(data.total ?? 0));
-    fetchStatsMonth(telegramId).then((data) => setMonthTotal(data.total ?? 0));
-  }, [telegramId]);
+    if (expenses) {
+      const now = Date.now();
+      const weekAgo = now - 7 * 86400000;
+      const monthAgo = now - 30 * 86400000;
+
+      const week = expenses
+        .filter(e => new Date(e.date).getTime() >= weekAgo)
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      const month = expenses
+        .filter(e => new Date(e.date).getTime() >= monthAgo)
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      const daysMap = new Map();
+      for (const exp of expenses) {
+        const day = exp.date.slice(0, 10);
+        daysMap.set(day, (daysMap.get(day) || 0) + exp.amount);
+      }
+
+      const daily = Array.from(daysMap.entries())
+        .sort((a, b) => b[0].localeCompare(a[0]))
+        .slice(0, 30)
+        .map(([day, total]) => ({ day, total }));
+
+      setWeekTotal(week);
+      setMonthTotal(month);
+      setDailyStats(daily);
+    } else {
+      // fallback на fetch (если что-то пойдёт не так)
+      fetchStatsWeek(telegramId).then((res) => setWeekTotal(res?.total ?? 0));
+      fetchStatsMonth(telegramId).then((res) => setMonthTotal(res?.total ?? 0));
+      fetchStatsDays(telegramId).then((res) => {
+        if (Array.isArray(res)) setDailyStats(res);
+      });
+    }
+  }, [telegramId, expenses]);
 
   return (
     <div className={styles.statsBlock}>

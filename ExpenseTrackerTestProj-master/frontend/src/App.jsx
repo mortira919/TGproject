@@ -31,9 +31,7 @@ function App() {
     return (
       <div style={styles.container}>
         <h2>⚠️ Открыто вне Telegram</h2>
-        <p>
-          Пожалуйста, открой мини-приложение через Telegram-бота.
-        </p>
+        <p>Пожалуйста, открой мини-приложение через Telegram-бота.</p>
       </div>
     );
   }
@@ -49,9 +47,9 @@ function App() {
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Трекер расходов</h1>
-      <ExpenseTracker telegramId={telegramId} />
-      <hr style={styles.divider} />
-      <ExpenseStats telegramId={telegramId} />
+      <ExpenseTracker telegramId={telegramId}>
+        {(expenses) => <ExpenseStats telegramId={telegramId} expenses={expenses} />}
+      </ExpenseTracker>
     </div>
   );
 }
@@ -65,13 +63,10 @@ const styles = {
     color: "#fff",
     backgroundColor: "#121212",
     minHeight: "100vh",
-    textAlign: "center"
+    textAlign: "center",
   },
   title: {
     textAlign: "center",
-  },
-  divider: {
-    margin: "24px 0",
   },
 };
 
