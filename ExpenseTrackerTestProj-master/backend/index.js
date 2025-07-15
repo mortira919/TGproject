@@ -100,6 +100,23 @@ app.get("/stats/month", (req, res) => {
   res.json(stmt.get(String(telegram_id)));
 });
 
+app.get("/stats/categories", (req, res) => {
+  const { telegram_id } = req.query;
+  if (!telegram_id) {
+    return res.status(400).json({ error: "telegram_id обязателен" });
+  }
+
+  const stmt = db.prepare(`
+    SELECT category, SUM(amount) as total
+    FROM expenses WHERE telegram_id = ?
+    GROUP BY category
+    ORDER BY total DESC
+  `);
+
+  const result = stmt.all(String(telegram_id));
+  res.json(result);
+});
+
 // ===== DEBUG Webhook Log =====
 app.use("/bot", (req, res, next) => {
   console.log("✅ Получен запрос от Telegram Webhook");

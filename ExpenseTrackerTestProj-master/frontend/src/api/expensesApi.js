@@ -77,3 +77,10 @@ export async function fetchStatsMonth(telegramId) {
   if (!res.ok) throw new Error("Ошибка при получении статистики за месяц");
   return res.json();
 }
+
+
+export async function fetchStatsCategories(telegramId) {
+  const res = await fetch(`${API_URL}/stats/categories?telegram_id=${telegramId}`);
+  if (!res.ok) throw new Error("Ошибка при получении статистики по категориям");
+  return res.json();
+}
