@@ -13,7 +13,9 @@ export default function ExpenseTracker({ telegramId }) {
   const [editing, setEditing] = useState(null);
 
   useEffect(() => {
-    loadExpenses();
+    if (telegramId) {
+      loadExpenses();
+    }
   }, [telegramId]);
 
   async function loadExpenses() {
@@ -28,12 +30,19 @@ export default function ExpenseTracker({ telegramId }) {
   }
 
   async function handleSave(expense) {
+    const preparedExpense = {
+      ...expense,
+      amount: Number(expense.amount),
+      telegram_id: telegramId,
+    };
+
     if (editing) {
-      await updateExpense(Number(editing.id), expense);
+      await updateExpense(Number(editing.id), preparedExpense);
       setEditing(null);
     } else {
-      await addExpense({ ...expense, telegram_id: telegramId });
+      await addExpense(preparedExpense);
     }
+
     loadExpenses();
   }
 
@@ -44,16 +53,25 @@ export default function ExpenseTracker({ telegramId }) {
         {expenses.map((exp) => (
           <li key={exp.id}>
             {exp.amount} ₽ — {exp.category} ({exp.comment})
-            <button onClick={() => setEditing(exp)} style={styles.editBtn}>✏️</button>
-            <button onClick={() => handleDelete(exp.id)} style={styles.delBtn}>🗑</button>
+            <button onClick={() => setEditing(exp)} style={styles.editBtn}>
+              ✏️
+            </button>
+            <button onClick={() => handleDelete(exp.id)} style={styles.delBtn}>
+              🗑
+            </button>
           </li>
         ))}
       </ul>
 
       <h3>{editing ? "Редактировать расход" : "Добавить расход"}</h3>
-      <AddExpenseForm onSave={handleSave} initialData={editing} />
+      <AddExpenseForm
+        onSave={handleSave}
+        initialData={editing}
+        telegramId={telegramId}
+      />
 
       <hr style={{ margin: "20px 0" }} />
+
       <ExpenseStats telegramId={telegramId} />
     </div>
   );
